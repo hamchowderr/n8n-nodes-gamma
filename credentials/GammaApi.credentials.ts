@@ -1,5 +1,6 @@
 import {
 	IAuthenticateGeneric,
+	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
 } from 'n8n-workflow';
@@ -27,6 +28,17 @@ export class GammaApi implements ICredentialType {
 		properties: {
 			headers: {
 				'X-API-KEY': '={{$credentials.apiKey}}',
+			},
+		},
+	};
+
+	test: ICredentialTestRequest = {
+		request: {
+			baseURL: 'https://public-api.gamma.app/v0.2',
+			url: '/generations',
+			method: 'POST',
+			body: {
+				inputText: 'test',
 			},
 		},
 	};

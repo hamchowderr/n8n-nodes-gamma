@@ -128,12 +128,37 @@ In n8n:
 8. Execute the node
 9. Use the returned `generationId` in a **Get Status** node to check progress
 
+**cURL Request:**
+```bash
+curl -X POST https://api.gamma.app/api/v0.2/generate \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: YOUR_API_KEY_HERE" \
+  -d '{
+    "inputText": "Create a pitch deck about sustainable energy solutions",
+    "textMode": "generate",
+    "format": "presentation",
+    "themeName": "Oasis",
+    "numberOfCards": 10,
+    "textOptions": {
+      "amount": "detailed",
+      "tone": "professional and inspiring",
+      "audience": "investors and entrepreneurs"
+    }
+  }'
+```
+
 ### Example 2: Check Generation Status
 
 1. Add a Gamma node (or reuse existing)
 2. Select **Get Status** operation
 3. Enter the **Generation ID** from a previous Generate operation
 4. Execute to see if generation is complete and get the Gamma URL
+
+**cURL Request:**
+```bash
+curl -X GET https://api.gamma.app/api/v0.2/status/GENERATION_ID_HERE \
+  -H "X-API-KEY: YOUR_API_KEY_HERE"
+```
 
 ### Example 3: Generate Social Media Post
 
@@ -149,6 +174,25 @@ In n8n:
    - Set **Style**: "minimal, colorful, modern"
 7. Execute and get your social media content
 
+**cURL Request:**
+```bash
+curl -X POST https://api.gamma.app/api/v0.2/generate \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: YOUR_API_KEY_HERE" \
+  -d '{
+    "inputText": "5 tips for productivity",
+    "format": "social",
+    "cardOptions": {
+      "dimensions": "4x5"
+    },
+    "imageOptions": {
+      "source": "aiGenerated",
+      "model": "flux-fast-1.1",
+      "style": "minimal, colorful, modern"
+    }
+  }'
+```
+
 ### Example 4: Automated Educational Mini-Books
 
 Generate beautiful educational mini-books instantly using AI. Perfect for teachers, students, and educational content creators.
@@ -161,6 +205,22 @@ Generate beautiful educational mini-books instantly using AI. Perfect for teache
    - **Additional Options**: Set Number of Cards to 8-12
    - **Text Options**: Set Audience to "middle school students"
 4. **Output**: Educational document ready for classroom use
+
+**cURL Request:**
+```bash
+curl -X POST https://api.gamma.app/api/v0.2/generate \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: YOUR_API_KEY_HERE" \
+  -d '{
+    "inputText": "Introduction to Photosynthesis",
+    "textMode": "generate",
+    "format": "document",
+    "numberOfCards": 10,
+    "textOptions": {
+      "audience": "middle school students"
+    }
+  }'
+```
 
 ### Example 5: Automated Client Onboarding Presentations
 
@@ -179,6 +239,27 @@ Our agent automates client onboarding by taking webform data, performing deep re
 6. **Gamma Node - Get Status**: Check generation status and retrieve download URL
 7. **Slack Node**: Send PPTX download link to team channel
 
+**cURL Request (Generate):**
+```bash
+curl -X POST https://api.gamma.app/api/v0.2/generate \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: YOUR_API_KEY_HERE" \
+  -d '{
+    "inputText": "Your detailed client onboarding presentation outline here...",
+    "textMode": "preserve",
+    "format": "presentation",
+    "numberOfCards": 25,
+    "exportAs": "pptx",
+    "themeName": "Consultant"
+  }'
+```
+
+**cURL Request (Get Status):**
+```bash
+curl -X GET https://api.gamma.app/api/v0.2/status/GENERATION_ID_HERE \
+  -H "X-API-KEY: YOUR_API_KEY_HERE"
+```
+
 ### Example 6: Automated Sales Presentations from CRM
 
 Create personalized sales presentations automatically when meetings are scheduled.
@@ -196,6 +277,23 @@ Create personalized sales presentations automatically when meetings are schedule
      - Audience: Lead's industry and role
    - **Theme Name**: Select professional theme (e.g., "Consultant")
 6. **Email/Slack**: Send presentation link to sales rep
+
+**cURL Request:**
+```bash
+curl -X POST https://api.gamma.app/api/v0.2/generate \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: YOUR_API_KEY_HERE" \
+  -d '{
+    "inputText": "Your personalized sales presentation outline here...",
+    "textMode": "generate",
+    "format": "presentation",
+    "themeName": "Consultant",
+    "textOptions": {
+      "tone": "professional and persuasive",
+      "audience": "enterprise technology decision makers"
+    }
+  }'
+```
 
 ### Example 7: Investment Memo to Presentation Pipeline
 
@@ -217,6 +315,28 @@ Automate creation of investor presentations from investment memos containing tex
      - Audience: "venture capital investors"
 5. **Export**: Download as PPTX and store in company drive
 6. **Notification**: Alert investment team of new presentation
+
+**cURL Request:**
+```bash
+curl -X POST https://api.gamma.app/api/v0.2/generate \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: YOUR_API_KEY_HERE" \
+  -d '{
+    "inputText": "Your structured investment memo content here...",
+    "textMode": "preserve",
+    "format": "presentation",
+    "cardSplit": "inputTextBreaks",
+    "exportAs": "pptx",
+    "imageOptions": {
+      "source": "aiGenerated",
+      "style": "professional, financial, clean"
+    },
+    "textOptions": {
+      "tone": "data-driven and persuasive",
+      "audience": "venture capital investors"
+    }
+  }'
+```
 
 ## Real-World Use Cases
 

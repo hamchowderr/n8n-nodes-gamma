@@ -6,3 +6,13 @@ dist
 npm-debug.log*
 yarn.lock
 .vscode/launch.json
+
+# Claude AI files
+.claude
+
+# Package files
+*.tgz
+
+# Environment files
+.env
+.env.local

@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-gamma",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "n8n node for Gamma API - Generate AI-powered presentations, documents, and social posts",
   "keywords": [
     "n8n-community-node-package",

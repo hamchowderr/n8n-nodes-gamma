@@ -192,6 +192,14 @@ export const gammaFields: INodeProperties[] = [
 				description: 'Additional file type for saving your gamma (choose one)',
 			},
 			{
+				displayName: 'Folder IDs',
+				name: 'folderIds',
+				type: 'string',
+				default: '',
+				description: 'Comma-separated list of folder IDs where the generated gamma should be stored. Example: 123abc456,def456789. Get folder IDs using the List Folders operation.',
+				placeholder: '123abc456,def456789',
+			},
+			{
 				displayName: 'Number of Cards',
 				name: 'numCards',
 				type: 'number',
@@ -201,6 +209,14 @@ export const gammaFields: INodeProperties[] = [
 					minValue: 1,
 					maxValue: 75,
 				},
+			},
+			{
+				displayName: 'Theme ID',
+				name: 'themeId',
+				type: 'string',
+				default: '',
+				description: 'The ID of the Gamma theme to apply. Alternative to Theme Name. Get theme IDs using the List Themes operation or copy from the app.',
+				placeholder: 'theme_abc123',
 			},
 			{
 				displayName: 'Theme Name',
@@ -311,22 +327,6 @@ export const gammaFields: INodeProperties[] = [
 				],
 				default: 'Gamma',
 				description: 'The theme from Gamma that will be used for your creation',
-			},
-			{
-				displayName: 'Theme ID',
-				name: 'themeId',
-				type: 'string',
-				default: '',
-				description: 'The ID of the Gamma theme to apply. Alternative to Theme Name. Get theme IDs using the List Themes operation or copy from the app.',
-				placeholder: 'theme_abc123',
-			},
-			{
-				displayName: 'Folder IDs',
-				name: 'folderIds',
-				type: 'string',
-				default: '',
-				description: 'Comma-separated list of folder IDs where the generated gamma should be stored. Example: 123abc456,def456789. Get folder IDs using the List Folders operation.',
-				placeholder: '123abc456,def456789',
 			},
 		],
 	},
@@ -677,680 +677,584 @@ export const gammaFields: INodeProperties[] = [
 						name: 'positions',
 						values: [
 							{
-								displayName: 'Top Left',
-								name: 'topLeft',
-								type: 'fixedCollection',
-								default: {},
-								description: 'Content to display in top left position',
-								options: [
+						displayName: 'Bottom Center',
+						name: 'bottomCenter',
+						type: 'fixedCollection',
+						default: {},
+						description: 'Content to display in bottom center position',
+						options: [
 									{
 										displayName: 'Element',
 										name: 'element',
-										values: [
-											{
-												displayName: 'Type',
-												name: 'type',
-												type: 'options',
-												options: [
-													{
-														name: 'Card Number',
-														value: 'cardNumber',
-													},
-													{
-														name: 'Image',
-														value: 'image',
-													},
-													{
-														name: 'Text',
-														value: 'text',
-													},
-												],
-												default: 'text',
-												description: 'Type of content for this position',
-											},
-											{
-												displayName: 'Value',
-												name: 'value',
-												type: 'string',
-												default: '',
-												description: 'Text to display (required when type is Text)',
-												placeholder: 'My Company',
-												displayOptions: {
-													show: {
-														type: ['text'],
-													},
+											values: [
+										{
+											displayName: 'Image URL',
+											name: 'src',
+											type: 'string',
+											default: '',
+											description: 'Custom image URL (required when source is Custom)',
+											placeholder: 'https://example.com/logo.png',
+										},
+										{
+											displayName: 'Size',
+											name: 'size',
+											type: 'options',
+											options: [
+												{
+													name: 'Large',
+													value: 'lg',
 												},
-											},
-											{
-												displayName: 'Source',
-												name: 'source',
-												type: 'options',
-												options: [
-													{
-														name: 'Custom',
-														value: 'custom',
-													},
-													{
-														name: 'Theme Logo',
-														value: 'themeLogo',
-													},
-												],
-												default: 'themeLogo',
-												description: 'Image source (required when type is Image)',
-												displayOptions: {
-													show: {
-														type: ['image'],
-													},
+												{
+													name: 'Medium',
+													value: 'md',
 												},
-											},
-											{
-												displayName: 'Image URL',
-												name: 'src',
-												type: 'string',
-												default: '',
-												description: 'Custom image URL (required when source is Custom)',
-												placeholder: 'https://example.com/logo.png',
-												displayOptions: {
-													show: {
-														type: ['image'],
-														source: ['custom'],
-													},
+												{
+													name: 'Small',
+													value: 'sm',
 												},
-											},
-											{
-												displayName: 'Size',
-												name: 'size',
-												type: 'options',
-												options: [
-													{
-														name: 'Large',
-														value: 'lg',
-													},
-													{
-														name: 'Medium',
-														value: 'md',
-													},
-													{
-														name: 'Small',
-														value: 'sm',
-													},
-													{
-														name: 'Extra Large',
-														value: 'xl',
-													},
+												{
+													name: 'Extra Large',
+													value: 'xl',
+												},
+													],
+											default: 'md',
+											description: 'Size of the element',
+										},
+										{
+											displayName: 'Source',
+											name: 'source',
+											type: 'options',
+											options: [
+												{
+													name: 'Custom',
+													value: 'custom',
+												},
+												{
+													name: 'Theme Logo',
+													value: 'themeLogo',
+												},
 												],
-												default: 'md',
-												description: 'Size of the element',
-											},
-										],
+											default: 'themeLogo',
+											description: 'Image source (required when type is Image)',
+										},
+										{
+											displayName: 'Type',
+											name: 'type',
+											type: 'options',
+											options: [
+												{
+													name: 'Card Number',
+													value: 'cardNumber',
+												},
+												{
+													name: 'Image',
+													value: 'image',
+												},
+												{
+													name: 'Text',
+													value: 'text',
+												},
+												],
+											default: 'text',
+											description: 'Type of content for this position',
+										},
+										{
+											displayName: 'Value',
+											name: 'value',
+											type: 'string',
+											default: '',
+											description: 'Text to display (required when type is Text)',
+											placeholder: 'My Company',
+										},
+								]
 									},
-								],
+					]
 							},
 							{
-								displayName: 'Top Center',
-								name: 'topCenter',
-								type: 'fixedCollection',
-								default: {},
-								description: 'Content to display in top center position',
-								options: [
+						displayName: 'Bottom Left',
+						name: 'bottomLeft',
+						type: 'fixedCollection',
+						default: {},
+						description: 'Content to display in bottom left position',
+						options: [
 									{
 										displayName: 'Element',
 										name: 'element',
-										values: [
-											{
-												displayName: 'Type',
-												name: 'type',
-												type: 'options',
-												options: [
-													{
-														name: 'Card Number',
-														value: 'cardNumber',
-													},
-													{
-														name: 'Image',
-														value: 'image',
-													},
-													{
-														name: 'Text',
-														value: 'text',
-													},
-												],
-												default: 'text',
-												description: 'Type of content for this position',
-											},
-											{
-												displayName: 'Value',
-												name: 'value',
-												type: 'string',
-												default: '',
-												description: 'Text to display (required when type is Text)',
-												placeholder: 'My Company',
-												displayOptions: {
-													show: {
-														type: ['text'],
-													},
+											values: [
+										{
+											displayName: 'Image URL',
+											name: 'src',
+											type: 'string',
+											default: '',
+											description: 'Custom image URL (required when source is Custom)',
+											placeholder: 'https://example.com/logo.png',
+										},
+										{
+											displayName: 'Size',
+											name: 'size',
+											type: 'options',
+											options: [
+												{
+													name: 'Large',
+													value: 'lg',
 												},
-											},
-											{
-												displayName: 'Source',
-												name: 'source',
-												type: 'options',
-												options: [
-													{
-														name: 'Custom',
-														value: 'custom',
-													},
-													{
-														name: 'Theme Logo',
-														value: 'themeLogo',
-													},
-												],
-												default: 'themeLogo',
-												description: 'Image source (required when type is Image)',
-												displayOptions: {
-													show: {
-														type: ['image'],
-													},
+												{
+													name: 'Medium',
+													value: 'md',
 												},
-											},
-											{
-												displayName: 'Image URL',
-												name: 'src',
-												type: 'string',
-												default: '',
-												description: 'Custom image URL (required when source is Custom)',
-												placeholder: 'https://example.com/logo.png',
-												displayOptions: {
-													show: {
-														type: ['image'],
-														source: ['custom'],
-													},
+												{
+													name: 'Small',
+													value: 'sm',
 												},
-											},
-											{
-												displayName: 'Size',
-												name: 'size',
-												type: 'options',
-												options: [
-													{
-														name: 'Large',
-														value: 'lg',
-													},
-													{
-														name: 'Medium',
-														value: 'md',
-													},
-													{
-														name: 'Small',
-														value: 'sm',
-													},
-													{
-														name: 'Extra Large',
-														value: 'xl',
-													},
+												{
+													name: 'Extra Large',
+													value: 'xl',
+												},
+													],
+											default: 'md',
+											description: 'Size of the element',
+										},
+										{
+											displayName: 'Source',
+											name: 'source',
+											type: 'options',
+											options: [
+												{
+													name: 'Custom',
+													value: 'custom',
+												},
+												{
+													name: 'Theme Logo',
+													value: 'themeLogo',
+												},
 												],
-												default: 'md',
-												description: 'Size of the element',
-											},
-										],
+											default: 'themeLogo',
+											description: 'Image source (required when type is Image)',
+										},
+										{
+											displayName: 'Type',
+											name: 'type',
+											type: 'options',
+											options: [
+												{
+													name: 'Card Number',
+													value: 'cardNumber',
+												},
+												{
+													name: 'Image',
+													value: 'image',
+												},
+												{
+													name: 'Text',
+													value: 'text',
+												},
+												],
+											default: 'text',
+											description: 'Type of content for this position',
+										},
+										{
+											displayName: 'Value',
+											name: 'value',
+											type: 'string',
+											default: '',
+											description: 'Text to display (required when type is Text)',
+											placeholder: 'My Company',
+										},
+								]
 									},
-								],
+					]
 							},
 							{
-								displayName: 'Top Right',
-								name: 'topRight',
-								type: 'fixedCollection',
-								default: {},
-								description: 'Content to display in top right position',
-								options: [
+						displayName: 'Bottom Right',
+						name: 'bottomRight',
+						type: 'fixedCollection',
+						default: {},
+						description: 'Content to display in bottom right position',
+						options: [
 									{
 										displayName: 'Element',
 										name: 'element',
-										values: [
-											{
-												displayName: 'Type',
-												name: 'type',
-												type: 'options',
-												options: [
-													{
-														name: 'Card Number',
-														value: 'cardNumber',
-													},
-													{
-														name: 'Image',
-														value: 'image',
-													},
-													{
-														name: 'Text',
-														value: 'text',
-													},
-												],
-												default: 'text',
-												description: 'Type of content for this position',
-											},
-											{
-												displayName: 'Value',
-												name: 'value',
-												type: 'string',
-												default: '',
-												description: 'Text to display (required when type is Text)',
-												placeholder: 'My Company',
-												displayOptions: {
-													show: {
-														type: ['text'],
-													},
+											values: [
+										{
+											displayName: 'Image URL',
+											name: 'src',
+											type: 'string',
+											default: '',
+											description: 'Custom image URL (required when source is Custom)',
+											placeholder: 'https://example.com/logo.png',
+										},
+										{
+											displayName: 'Size',
+											name: 'size',
+											type: 'options',
+											options: [
+												{
+													name: 'Large',
+													value: 'lg',
 												},
-											},
-											{
-												displayName: 'Source',
-												name: 'source',
-												type: 'options',
-												options: [
-													{
-														name: 'Custom',
-														value: 'custom',
-													},
-													{
-														name: 'Theme Logo',
-														value: 'themeLogo',
-													},
-												],
-												default: 'themeLogo',
-												description: 'Image source (required when type is Image)',
-												displayOptions: {
-													show: {
-														type: ['image'],
-													},
+												{
+													name: 'Medium',
+													value: 'md',
 												},
-											},
-											{
-												displayName: 'Image URL',
-												name: 'src',
-												type: 'string',
-												default: '',
-												description: 'Custom image URL (required when source is Custom)',
-												placeholder: 'https://example.com/logo.png',
-												displayOptions: {
-													show: {
-														type: ['image'],
-														source: ['custom'],
-													},
+												{
+													name: 'Small',
+													value: 'sm',
 												},
-											},
-											{
-												displayName: 'Size',
-												name: 'size',
-												type: 'options',
-												options: [
-													{
-														name: 'Large',
-														value: 'lg',
-													},
-													{
-														name: 'Medium',
-														value: 'md',
-													},
-													{
-														name: 'Small',
-														value: 'sm',
-													},
-													{
-														name: 'Extra Large',
-														value: 'xl',
-													},
+												{
+													name: 'Extra Large',
+													value: 'xl',
+												},
+													],
+											default: 'md',
+											description: 'Size of the element',
+										},
+										{
+											displayName: 'Source',
+											name: 'source',
+											type: 'options',
+											options: [
+												{
+													name: 'Custom',
+													value: 'custom',
+												},
+												{
+													name: 'Theme Logo',
+													value: 'themeLogo',
+												},
 												],
-												default: 'md',
-												description: 'Size of the element',
-											},
-										],
+											default: 'themeLogo',
+											description: 'Image source (required when type is Image)',
+										},
+										{
+											displayName: 'Type',
+											name: 'type',
+											type: 'options',
+											options: [
+												{
+													name: 'Card Number',
+													value: 'cardNumber',
+												},
+												{
+													name: 'Image',
+													value: 'image',
+												},
+												{
+													name: 'Text',
+													value: 'text',
+												},
+												],
+											default: 'text',
+											description: 'Type of content for this position',
+										},
+										{
+											displayName: 'Value',
+											name: 'value',
+											type: 'string',
+											default: '',
+											description: 'Text to display (required when type is Text)',
+											placeholder: 'My Company',
+										},
+								]
 									},
-								],
+					]
 							},
 							{
-								displayName: 'Bottom Left',
-								name: 'bottomLeft',
-								type: 'fixedCollection',
-								default: {},
-								description: 'Content to display in bottom left position',
-								options: [
+						displayName: 'Hide From First Card',
+						name: 'hideFromFirstCard',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to hide header/footer from the first card',
+							},
+							{
+						displayName: 'Hide From Last Card',
+						name: 'hideFromLastCard',
+						type: 'boolean',
+						default: false,
+						description: 'Whether to hide header/footer from the last card',
+							},
+							{
+						displayName: 'Top Center',
+						name: 'topCenter',
+						type: 'fixedCollection',
+						default: {},
+						description: 'Content to display in top center position',
+						options: [
 									{
 										displayName: 'Element',
 										name: 'element',
-										values: [
-											{
-												displayName: 'Type',
-												name: 'type',
-												type: 'options',
-												options: [
-													{
-														name: 'Card Number',
-														value: 'cardNumber',
-													},
-													{
-														name: 'Image',
-														value: 'image',
-													},
-													{
-														name: 'Text',
-														value: 'text',
-													},
-												],
-												default: 'text',
-												description: 'Type of content for this position',
-											},
-											{
-												displayName: 'Value',
-												name: 'value',
-												type: 'string',
-												default: '',
-												description: 'Text to display (required when type is Text)',
-												placeholder: 'My Company',
-												displayOptions: {
-													show: {
-														type: ['text'],
-													},
+											values: [
+										{
+											displayName: 'Image URL',
+											name: 'src',
+											type: 'string',
+											default: '',
+											description: 'Custom image URL (required when source is Custom)',
+											placeholder: 'https://example.com/logo.png',
+										},
+										{
+											displayName: 'Size',
+											name: 'size',
+											type: 'options',
+											options: [
+												{
+													name: 'Large',
+													value: 'lg',
 												},
-											},
-											{
-												displayName: 'Source',
-												name: 'source',
-												type: 'options',
-												options: [
-													{
-														name: 'Custom',
-														value: 'custom',
-													},
-													{
-														name: 'Theme Logo',
-														value: 'themeLogo',
-													},
-												],
-												default: 'themeLogo',
-												description: 'Image source (required when type is Image)',
-												displayOptions: {
-													show: {
-														type: ['image'],
-													},
+												{
+													name: 'Medium',
+													value: 'md',
 												},
-											},
-											{
-												displayName: 'Image URL',
-												name: 'src',
-												type: 'string',
-												default: '',
-												description: 'Custom image URL (required when source is Custom)',
-												placeholder: 'https://example.com/logo.png',
-												displayOptions: {
-													show: {
-														type: ['image'],
-														source: ['custom'],
-													},
+												{
+													name: 'Small',
+													value: 'sm',
 												},
-											},
-											{
-												displayName: 'Size',
-												name: 'size',
-												type: 'options',
-												options: [
-													{
-														name: 'Large',
-														value: 'lg',
-													},
-													{
-														name: 'Medium',
-														value: 'md',
-													},
-													{
-														name: 'Small',
-														value: 'sm',
-													},
-													{
-														name: 'Extra Large',
-														value: 'xl',
-													},
+												{
+													name: 'Extra Large',
+													value: 'xl',
+												},
+													],
+											default: 'md',
+											description: 'Size of the element',
+										},
+										{
+											displayName: 'Source',
+											name: 'source',
+											type: 'options',
+											options: [
+												{
+													name: 'Custom',
+													value: 'custom',
+												},
+												{
+													name: 'Theme Logo',
+													value: 'themeLogo',
+												},
 												],
-												default: 'md',
-												description: 'Size of the element',
-											},
-										],
+											default: 'themeLogo',
+											description: 'Image source (required when type is Image)',
+										},
+										{
+											displayName: 'Type',
+											name: 'type',
+											type: 'options',
+											options: [
+												{
+													name: 'Card Number',
+													value: 'cardNumber',
+												},
+												{
+													name: 'Image',
+													value: 'image',
+												},
+												{
+													name: 'Text',
+													value: 'text',
+												},
+												],
+											default: 'text',
+											description: 'Type of content for this position',
+										},
+										{
+											displayName: 'Value',
+											name: 'value',
+											type: 'string',
+											default: '',
+											description: 'Text to display (required when type is Text)',
+											placeholder: 'My Company',
+										},
+								]
 									},
-								],
+					]
 							},
 							{
-								displayName: 'Bottom Center',
-								name: 'bottomCenter',
-								type: 'fixedCollection',
-								default: {},
-								description: 'Content to display in bottom center position',
-								options: [
+						displayName: 'Top Left',
+						name: 'topLeft',
+						type: 'fixedCollection',
+						default: {},
+						description: 'Content to display in top left position',
+						options: [
 									{
 										displayName: 'Element',
 										name: 'element',
-										values: [
-											{
-												displayName: 'Type',
-												name: 'type',
-												type: 'options',
-												options: [
-													{
-														name: 'Card Number',
-														value: 'cardNumber',
-													},
-													{
-														name: 'Image',
-														value: 'image',
-													},
-													{
-														name: 'Text',
-														value: 'text',
-													},
-												],
-												default: 'text',
-												description: 'Type of content for this position',
-											},
-											{
-												displayName: 'Value',
-												name: 'value',
-												type: 'string',
-												default: '',
-												description: 'Text to display (required when type is Text)',
-												placeholder: 'My Company',
-												displayOptions: {
-													show: {
-														type: ['text'],
-													},
+											values: [
+										{
+											displayName: 'Image URL',
+											name: 'src',
+											type: 'string',
+											default: '',
+											description: 'Custom image URL (required when source is Custom)',
+											placeholder: 'https://example.com/logo.png',
+										},
+										{
+											displayName: 'Size',
+											name: 'size',
+											type: 'options',
+											options: [
+												{
+													name: 'Large',
+													value: 'lg',
 												},
-											},
-											{
-												displayName: 'Source',
-												name: 'source',
-												type: 'options',
-												options: [
-													{
-														name: 'Custom',
-														value: 'custom',
-													},
-													{
-														name: 'Theme Logo',
-														value: 'themeLogo',
-													},
-												],
-												default: 'themeLogo',
-												description: 'Image source (required when type is Image)',
-												displayOptions: {
-													show: {
-														type: ['image'],
-													},
+												{
+													name: 'Medium',
+													value: 'md',
 												},
-											},
-											{
-												displayName: 'Image URL',
-												name: 'src',
-												type: 'string',
-												default: '',
-												description: 'Custom image URL (required when source is Custom)',
-												placeholder: 'https://example.com/logo.png',
-												displayOptions: {
-													show: {
-														type: ['image'],
-														source: ['custom'],
-													},
+												{
+													name: 'Small',
+													value: 'sm',
 												},
-											},
-											{
-												displayName: 'Size',
-												name: 'size',
-												type: 'options',
-												options: [
-													{
-														name: 'Large',
-														value: 'lg',
-													},
-													{
-														name: 'Medium',
-														value: 'md',
-													},
-													{
-														name: 'Small',
-														value: 'sm',
-													},
-													{
-														name: 'Extra Large',
-														value: 'xl',
-													},
+												{
+													name: 'Extra Large',
+													value: 'xl',
+												},
+													],
+											default: 'md',
+											description: 'Size of the element',
+										},
+										{
+											displayName: 'Source',
+											name: 'source',
+											type: 'options',
+											options: [
+												{
+													name: 'Custom',
+													value: 'custom',
+												},
+												{
+													name: 'Theme Logo',
+													value: 'themeLogo',
+												},
 												],
-												default: 'md',
-												description: 'Size of the element',
-											},
-										],
+											default: 'themeLogo',
+											description: 'Image source (required when type is Image)',
+										},
+										{
+											displayName: 'Type',
+											name: 'type',
+											type: 'options',
+											options: [
+												{
+													name: 'Card Number',
+													value: 'cardNumber',
+												},
+												{
+													name: 'Image',
+													value: 'image',
+												},
+												{
+													name: 'Text',
+													value: 'text',
+												},
+												],
+											default: 'text',
+											description: 'Type of content for this position',
+										},
+										{
+											displayName: 'Value',
+											name: 'value',
+											type: 'string',
+											default: '',
+											description: 'Text to display (required when type is Text)',
+											placeholder: 'My Company',
+										},
+								]
 									},
-								],
+					]
 							},
 							{
-								displayName: 'Bottom Right',
-								name: 'bottomRight',
-								type: 'fixedCollection',
-								default: {},
-								description: 'Content to display in bottom right position',
-								options: [
+						displayName: 'Top Right',
+						name: 'topRight',
+						type: 'fixedCollection',
+						default: {},
+						description: 'Content to display in top right position',
+						options: [
 									{
 										displayName: 'Element',
 										name: 'element',
-										values: [
-											{
-												displayName: 'Type',
-												name: 'type',
-												type: 'options',
-												options: [
-													{
-														name: 'Card Number',
-														value: 'cardNumber',
-													},
-													{
-														name: 'Image',
-														value: 'image',
-													},
-													{
-														name: 'Text',
-														value: 'text',
-													},
-												],
-												default: 'text',
-												description: 'Type of content for this position',
-											},
-											{
-												displayName: 'Value',
-												name: 'value',
-												type: 'string',
-												default: '',
-												description: 'Text to display (required when type is Text)',
-												placeholder: 'My Company',
-												displayOptions: {
-													show: {
-														type: ['text'],
-													},
+											values: [
+										{
+											displayName: 'Image URL',
+											name: 'src',
+											type: 'string',
+											default: '',
+											description: 'Custom image URL (required when source is Custom)',
+											placeholder: 'https://example.com/logo.png',
+										},
+										{
+											displayName: 'Size',
+											name: 'size',
+											type: 'options',
+											options: [
+												{
+													name: 'Large',
+													value: 'lg',
 												},
-											},
-											{
-												displayName: 'Source',
-												name: 'source',
-												type: 'options',
-												options: [
-													{
-														name: 'Custom',
-														value: 'custom',
-													},
-													{
-														name: 'Theme Logo',
-														value: 'themeLogo',
-													},
-												],
-												default: 'themeLogo',
-												description: 'Image source (required when type is Image)',
-												displayOptions: {
-													show: {
-														type: ['image'],
-													},
+												{
+													name: 'Medium',
+													value: 'md',
 												},
-											},
-											{
-												displayName: 'Image URL',
-												name: 'src',
-												type: 'string',
-												default: '',
-												description: 'Custom image URL (required when source is Custom)',
-												placeholder: 'https://example.com/logo.png',
-												displayOptions: {
-													show: {
-														type: ['image'],
-														source: ['custom'],
-													},
+												{
+													name: 'Small',
+													value: 'sm',
 												},
-											},
-											{
-												displayName: 'Size',
-												name: 'size',
-												type: 'options',
-												options: [
-													{
-														name: 'Large',
-														value: 'lg',
-													},
-													{
-														name: 'Medium',
-														value: 'md',
-													},
-													{
-														name: 'Small',
-														value: 'sm',
-													},
-													{
-														name: 'Extra Large',
-														value: 'xl',
-													},
+												{
+													name: 'Extra Large',
+													value: 'xl',
+												},
+													],
+											default: 'md',
+											description: 'Size of the element',
+										},
+										{
+											displayName: 'Source',
+											name: 'source',
+											type: 'options',
+											options: [
+												{
+													name: 'Custom',
+													value: 'custom',
+												},
+												{
+													name: 'Theme Logo',
+													value: 'themeLogo',
+												},
 												],
-												default: 'md',
-												description: 'Size of the element',
-											},
-										],
+											default: 'themeLogo',
+											description: 'Image source (required when type is Image)',
+										},
+										{
+											displayName: 'Type',
+											name: 'type',
+											type: 'options',
+											options: [
+												{
+													name: 'Card Number',
+													value: 'cardNumber',
+												},
+												{
+													name: 'Image',
+													value: 'image',
+												},
+												{
+													name: 'Text',
+													value: 'text',
+												},
+												],
+											default: 'text',
+											description: 'Type of content for this position',
+										},
+										{
+											displayName: 'Value',
+											name: 'value',
+											type: 'string',
+											default: '',
+											description: 'Text to display (required when type is Text)',
+											placeholder: 'My Company',
+										},
+								]
 									},
-								],
+					]
 							},
-							{
-								displayName: 'Hide from First Card',
-								name: 'hideFromFirstCard',
-								type: 'boolean',
-								default: false,
-								description: 'Whether to hide header/footer from the first card',
-							},
-							{
-								displayName: 'Hide from Last Card',
-								name: 'hideFromLastCard',
-								type: 'boolean',
-								default: false,
-								description: 'Whether to hide header/footer from the last card',
-							},
-						],
+					],
 					},
 				],
 			},

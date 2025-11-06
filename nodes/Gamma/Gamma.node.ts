@@ -30,13 +30,6 @@ export class Gamma implements INodeType {
 				required: true,
 			},
 		],
-		requestDefaults: {
-			baseURL: 'https://public-api.gamma.app/v1.0',
-			headers: {
-				'Content-Type': 'application/json',
-				'Accept': 'application/json',
-			},
-		},
 		properties: [
 			{
 				displayName: 'Resource',

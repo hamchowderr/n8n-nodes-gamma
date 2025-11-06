@@ -1,14 +1,16 @@
-import {
+import type {
 	IAuthenticateGeneric,
 	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
+	Icon,
 } from 'n8n-workflow';
 
 export class GammaApi implements ICredentialType {
 	name = 'gammaApi';
 	displayName = 'Gamma API';
 	documentationUrl = 'https://developers.gamma.app';
+	icon: Icon = 'file:gamma.svg';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'API Key',

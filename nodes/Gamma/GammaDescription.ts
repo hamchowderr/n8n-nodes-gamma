@@ -13,6 +13,12 @@ export const gammaOperations: INodeProperties[] = [
 		},
 		options: [
 			{
+				name: 'Create From Template',
+				value: 'createFromTemplate',
+				description: 'Create a new gamma based on an existing template',
+				action: 'Create gamma from template',
+			},
+			{
 				name: 'Generate',
 				value: 'generate',
 				description: 'Create a new gamma presentation, document, or social post',
@@ -23,6 +29,18 @@ export const gammaOperations: INodeProperties[] = [
 				value: 'getStatus',
 				description: 'Get the status and URLs of a gamma generation',
 				action: 'Get gamma status',
+			},
+			{
+				name: 'List Folders',
+				value: 'listFolders',
+				description: 'List available folders in your workspace',
+				action: 'List folders',
+			},
+			{
+				name: 'List Themes',
+				value: 'listThemes',
+				description: 'List available Gamma themes',
+				action: 'List themes',
 			},
 		],
 		default: 'generate',
@@ -93,16 +111,20 @@ export const gammaFields: INodeProperties[] = [
 		},
 		options: [
 			{
-				name: 'Presentation',
-				value: 'presentation',
-			},
-			{
 				name: 'Document',
 				value: 'document',
 			},
 			{
+				name: 'Presentation',
+				value: 'presentation',
+			},
+			{
 				name: 'Social',
 				value: 'social',
+			},
+			{
+				name: 'Webpage',
+				value: 'webpage',
 			},
 		],
 		default: 'presentation',
@@ -126,7 +148,7 @@ export const gammaFields: INodeProperties[] = [
 				name: 'additionalInstructions',
 				type: 'string',
 				default: '',
-				description: 'Extra specifications about the desired content and layouts. Character limits: 1-500. Example: Make the titles catchy',
+				description: 'Extra specifications about the desired content and layouts. Character limits: 1-2000. Example: Make the titles catchy',
 				placeholder: 'Make the titles catchy',
 			},
 			{
@@ -289,6 +311,22 @@ export const gammaFields: INodeProperties[] = [
 				],
 				default: 'Gamma',
 				description: 'The theme from Gamma that will be used for your creation',
+			},
+			{
+				displayName: 'Theme ID',
+				name: 'themeId',
+				type: 'string',
+				default: '',
+				description: 'The ID of the Gamma theme to apply. Alternative to Theme Name. Get theme IDs using the List Themes operation or copy from the app.',
+				placeholder: 'theme_abc123',
+			},
+			{
+				displayName: 'Folder IDs',
+				name: 'folderIds',
+				type: 'string',
+				default: '',
+				description: 'Comma-separated list of folder IDs where the generated gamma should be stored. Example: 123abc456,def456789. Get folder IDs using the List Folders operation.',
+				placeholder: '123abc456,def456789',
 			},
 		],
 	},
@@ -627,6 +665,695 @@ export const gammaFields: INodeProperties[] = [
 				default: '4x5',
 				description: 'Aspect ratio of the cards to be generated. Options: 1x1, 4x5 (default), 9x16.',
 			},
+			{
+				displayName: 'Header/Footer',
+				name: 'headerFooter',
+				type: 'fixedCollection',
+				default: {},
+				description: 'Add headers and footers to cards',
+				options: [
+					{
+						displayName: 'Positions',
+						name: 'positions',
+						values: [
+							{
+								displayName: 'Top Left',
+								name: 'topLeft',
+								type: 'fixedCollection',
+								default: {},
+								description: 'Content to display in top left position',
+								options: [
+									{
+										displayName: 'Element',
+										name: 'element',
+										values: [
+											{
+												displayName: 'Type',
+												name: 'type',
+												type: 'options',
+												options: [
+													{
+														name: 'Card Number',
+														value: 'cardNumber',
+													},
+													{
+														name: 'Image',
+														value: 'image',
+													},
+													{
+														name: 'Text',
+														value: 'text',
+													},
+												],
+												default: 'text',
+												description: 'Type of content for this position',
+											},
+											{
+												displayName: 'Value',
+												name: 'value',
+												type: 'string',
+												default: '',
+												description: 'Text to display (required when type is Text)',
+												placeholder: 'My Company',
+												displayOptions: {
+													show: {
+														type: ['text'],
+													},
+												},
+											},
+											{
+												displayName: 'Source',
+												name: 'source',
+												type: 'options',
+												options: [
+													{
+														name: 'Custom',
+														value: 'custom',
+													},
+													{
+														name: 'Theme Logo',
+														value: 'themeLogo',
+													},
+												],
+												default: 'themeLogo',
+												description: 'Image source (required when type is Image)',
+												displayOptions: {
+													show: {
+														type: ['image'],
+													},
+												},
+											},
+											{
+												displayName: 'Image URL',
+												name: 'src',
+												type: 'string',
+												default: '',
+												description: 'Custom image URL (required when source is Custom)',
+												placeholder: 'https://example.com/logo.png',
+												displayOptions: {
+													show: {
+														type: ['image'],
+														source: ['custom'],
+													},
+												},
+											},
+											{
+												displayName: 'Size',
+												name: 'size',
+												type: 'options',
+												options: [
+													{
+														name: 'Large',
+														value: 'lg',
+													},
+													{
+														name: 'Medium',
+														value: 'md',
+													},
+													{
+														name: 'Small',
+														value: 'sm',
+													},
+													{
+														name: 'Extra Large',
+														value: 'xl',
+													},
+												],
+												default: 'md',
+												description: 'Size of the element',
+											},
+										],
+									},
+								],
+							},
+							{
+								displayName: 'Top Center',
+								name: 'topCenter',
+								type: 'fixedCollection',
+								default: {},
+								description: 'Content to display in top center position',
+								options: [
+									{
+										displayName: 'Element',
+										name: 'element',
+										values: [
+											{
+												displayName: 'Type',
+												name: 'type',
+												type: 'options',
+												options: [
+													{
+														name: 'Card Number',
+														value: 'cardNumber',
+													},
+													{
+														name: 'Image',
+														value: 'image',
+													},
+													{
+														name: 'Text',
+														value: 'text',
+													},
+												],
+												default: 'text',
+												description: 'Type of content for this position',
+											},
+											{
+												displayName: 'Value',
+												name: 'value',
+												type: 'string',
+												default: '',
+												description: 'Text to display (required when type is Text)',
+												placeholder: 'My Company',
+												displayOptions: {
+													show: {
+														type: ['text'],
+													},
+												},
+											},
+											{
+												displayName: 'Source',
+												name: 'source',
+												type: 'options',
+												options: [
+													{
+														name: 'Custom',
+														value: 'custom',
+													},
+													{
+														name: 'Theme Logo',
+														value: 'themeLogo',
+													},
+												],
+												default: 'themeLogo',
+												description: 'Image source (required when type is Image)',
+												displayOptions: {
+													show: {
+														type: ['image'],
+													},
+												},
+											},
+											{
+												displayName: 'Image URL',
+												name: 'src',
+												type: 'string',
+												default: '',
+												description: 'Custom image URL (required when source is Custom)',
+												placeholder: 'https://example.com/logo.png',
+												displayOptions: {
+													show: {
+														type: ['image'],
+														source: ['custom'],
+													},
+												},
+											},
+											{
+												displayName: 'Size',
+												name: 'size',
+												type: 'options',
+												options: [
+													{
+														name: 'Large',
+														value: 'lg',
+													},
+													{
+														name: 'Medium',
+														value: 'md',
+													},
+													{
+														name: 'Small',
+														value: 'sm',
+													},
+													{
+														name: 'Extra Large',
+														value: 'xl',
+													},
+												],
+												default: 'md',
+												description: 'Size of the element',
+											},
+										],
+									},
+								],
+							},
+							{
+								displayName: 'Top Right',
+								name: 'topRight',
+								type: 'fixedCollection',
+								default: {},
+								description: 'Content to display in top right position',
+								options: [
+									{
+										displayName: 'Element',
+										name: 'element',
+										values: [
+											{
+												displayName: 'Type',
+												name: 'type',
+												type: 'options',
+												options: [
+													{
+														name: 'Card Number',
+														value: 'cardNumber',
+													},
+													{
+														name: 'Image',
+														value: 'image',
+													},
+													{
+														name: 'Text',
+														value: 'text',
+													},
+												],
+												default: 'text',
+												description: 'Type of content for this position',
+											},
+											{
+												displayName: 'Value',
+												name: 'value',
+												type: 'string',
+												default: '',
+												description: 'Text to display (required when type is Text)',
+												placeholder: 'My Company',
+												displayOptions: {
+													show: {
+														type: ['text'],
+													},
+												},
+											},
+											{
+												displayName: 'Source',
+												name: 'source',
+												type: 'options',
+												options: [
+													{
+														name: 'Custom',
+														value: 'custom',
+													},
+													{
+														name: 'Theme Logo',
+														value: 'themeLogo',
+													},
+												],
+												default: 'themeLogo',
+												description: 'Image source (required when type is Image)',
+												displayOptions: {
+													show: {
+														type: ['image'],
+													},
+												},
+											},
+											{
+												displayName: 'Image URL',
+												name: 'src',
+												type: 'string',
+												default: '',
+												description: 'Custom image URL (required when source is Custom)',
+												placeholder: 'https://example.com/logo.png',
+												displayOptions: {
+													show: {
+														type: ['image'],
+														source: ['custom'],
+													},
+												},
+											},
+											{
+												displayName: 'Size',
+												name: 'size',
+												type: 'options',
+												options: [
+													{
+														name: 'Large',
+														value: 'lg',
+													},
+													{
+														name: 'Medium',
+														value: 'md',
+													},
+													{
+														name: 'Small',
+														value: 'sm',
+													},
+													{
+														name: 'Extra Large',
+														value: 'xl',
+													},
+												],
+												default: 'md',
+												description: 'Size of the element',
+											},
+										],
+									},
+								],
+							},
+							{
+								displayName: 'Bottom Left',
+								name: 'bottomLeft',
+								type: 'fixedCollection',
+								default: {},
+								description: 'Content to display in bottom left position',
+								options: [
+									{
+										displayName: 'Element',
+										name: 'element',
+										values: [
+											{
+												displayName: 'Type',
+												name: 'type',
+												type: 'options',
+												options: [
+													{
+														name: 'Card Number',
+														value: 'cardNumber',
+													},
+													{
+														name: 'Image',
+														value: 'image',
+													},
+													{
+														name: 'Text',
+														value: 'text',
+													},
+												],
+												default: 'text',
+												description: 'Type of content for this position',
+											},
+											{
+												displayName: 'Value',
+												name: 'value',
+												type: 'string',
+												default: '',
+												description: 'Text to display (required when type is Text)',
+												placeholder: 'My Company',
+												displayOptions: {
+													show: {
+														type: ['text'],
+													},
+												},
+											},
+											{
+												displayName: 'Source',
+												name: 'source',
+												type: 'options',
+												options: [
+													{
+														name: 'Custom',
+														value: 'custom',
+													},
+													{
+														name: 'Theme Logo',
+														value: 'themeLogo',
+													},
+												],
+												default: 'themeLogo',
+												description: 'Image source (required when type is Image)',
+												displayOptions: {
+													show: {
+														type: ['image'],
+													},
+												},
+											},
+											{
+												displayName: 'Image URL',
+												name: 'src',
+												type: 'string',
+												default: '',
+												description: 'Custom image URL (required when source is Custom)',
+												placeholder: 'https://example.com/logo.png',
+												displayOptions: {
+													show: {
+														type: ['image'],
+														source: ['custom'],
+													},
+												},
+											},
+											{
+												displayName: 'Size',
+												name: 'size',
+												type: 'options',
+												options: [
+													{
+														name: 'Large',
+														value: 'lg',
+													},
+													{
+														name: 'Medium',
+														value: 'md',
+													},
+													{
+														name: 'Small',
+														value: 'sm',
+													},
+													{
+														name: 'Extra Large',
+														value: 'xl',
+													},
+												],
+												default: 'md',
+												description: 'Size of the element',
+											},
+										],
+									},
+								],
+							},
+							{
+								displayName: 'Bottom Center',
+								name: 'bottomCenter',
+								type: 'fixedCollection',
+								default: {},
+								description: 'Content to display in bottom center position',
+								options: [
+									{
+										displayName: 'Element',
+										name: 'element',
+										values: [
+											{
+												displayName: 'Type',
+												name: 'type',
+												type: 'options',
+												options: [
+													{
+														name: 'Card Number',
+														value: 'cardNumber',
+													},
+													{
+														name: 'Image',
+														value: 'image',
+													},
+													{
+														name: 'Text',
+														value: 'text',
+													},
+												],
+												default: 'text',
+												description: 'Type of content for this position',
+											},
+											{
+												displayName: 'Value',
+												name: 'value',
+												type: 'string',
+												default: '',
+												description: 'Text to display (required when type is Text)',
+												placeholder: 'My Company',
+												displayOptions: {
+													show: {
+														type: ['text'],
+													},
+												},
+											},
+											{
+												displayName: 'Source',
+												name: 'source',
+												type: 'options',
+												options: [
+													{
+														name: 'Custom',
+														value: 'custom',
+													},
+													{
+														name: 'Theme Logo',
+														value: 'themeLogo',
+													},
+												],
+												default: 'themeLogo',
+												description: 'Image source (required when type is Image)',
+												displayOptions: {
+													show: {
+														type: ['image'],
+													},
+												},
+											},
+											{
+												displayName: 'Image URL',
+												name: 'src',
+												type: 'string',
+												default: '',
+												description: 'Custom image URL (required when source is Custom)',
+												placeholder: 'https://example.com/logo.png',
+												displayOptions: {
+													show: {
+														type: ['image'],
+														source: ['custom'],
+													},
+												},
+											},
+											{
+												displayName: 'Size',
+												name: 'size',
+												type: 'options',
+												options: [
+													{
+														name: 'Large',
+														value: 'lg',
+													},
+													{
+														name: 'Medium',
+														value: 'md',
+													},
+													{
+														name: 'Small',
+														value: 'sm',
+													},
+													{
+														name: 'Extra Large',
+														value: 'xl',
+													},
+												],
+												default: 'md',
+												description: 'Size of the element',
+											},
+										],
+									},
+								],
+							},
+							{
+								displayName: 'Bottom Right',
+								name: 'bottomRight',
+								type: 'fixedCollection',
+								default: {},
+								description: 'Content to display in bottom right position',
+								options: [
+									{
+										displayName: 'Element',
+										name: 'element',
+										values: [
+											{
+												displayName: 'Type',
+												name: 'type',
+												type: 'options',
+												options: [
+													{
+														name: 'Card Number',
+														value: 'cardNumber',
+													},
+													{
+														name: 'Image',
+														value: 'image',
+													},
+													{
+														name: 'Text',
+														value: 'text',
+													},
+												],
+												default: 'text',
+												description: 'Type of content for this position',
+											},
+											{
+												displayName: 'Value',
+												name: 'value',
+												type: 'string',
+												default: '',
+												description: 'Text to display (required when type is Text)',
+												placeholder: 'My Company',
+												displayOptions: {
+													show: {
+														type: ['text'],
+													},
+												},
+											},
+											{
+												displayName: 'Source',
+												name: 'source',
+												type: 'options',
+												options: [
+													{
+														name: 'Custom',
+														value: 'custom',
+													},
+													{
+														name: 'Theme Logo',
+														value: 'themeLogo',
+													},
+												],
+												default: 'themeLogo',
+												description: 'Image source (required when type is Image)',
+												displayOptions: {
+													show: {
+														type: ['image'],
+													},
+												},
+											},
+											{
+												displayName: 'Image URL',
+												name: 'src',
+												type: 'string',
+												default: '',
+												description: 'Custom image URL (required when source is Custom)',
+												placeholder: 'https://example.com/logo.png',
+												displayOptions: {
+													show: {
+														type: ['image'],
+														source: ['custom'],
+													},
+												},
+											},
+											{
+												displayName: 'Size',
+												name: 'size',
+												type: 'options',
+												options: [
+													{
+														name: 'Large',
+														value: 'lg',
+													},
+													{
+														name: 'Medium',
+														value: 'md',
+													},
+													{
+														name: 'Small',
+														value: 'sm',
+													},
+													{
+														name: 'Extra Large',
+														value: 'xl',
+													},
+												],
+												default: 'md',
+												description: 'Size of the element',
+											},
+										],
+									},
+								],
+							},
+							{
+								displayName: 'Hide from First Card',
+								name: 'hideFromFirstCard',
+								type: 'boolean',
+								default: false,
+								description: 'Whether to hide header/footer from the first card',
+							},
+							{
+								displayName: 'Hide from Last Card',
+								name: 'hideFromLastCard',
+								type: 'boolean',
+								default: false,
+								description: 'Whether to hide header/footer from the last card',
+							},
+						],
+					},
+				],
+			},
 		],
 	},
 	{
@@ -697,6 +1424,316 @@ export const gammaFields: INodeProperties[] = [
 				default: 'noAccess',
 				description: 'Level of access to your gamma for members outside your workspace. Leave as No Access to use workspace share setting.',
 			},
+			{
+				displayName: 'Email Options',
+				name: 'emailOptions',
+				type: 'fixedCollection',
+				default: {},
+				description: 'Share gamma directly via email',
+				options: [
+					{
+						displayName: 'Email Recipients',
+						name: 'emailRecipients',
+						values: [
+							{
+								displayName: 'Recipients',
+								name: 'recipients',
+								type: 'string',
+								default: '',
+								description: 'Comma-separated list of email addresses to share the gamma with. Example: user1@example.com,user2@example.com.',
+								placeholder: 'user1@example.com,user2@example.com',
+							},
+							{
+								displayName: 'Access Level',
+								name: 'access',
+								type: 'options',
+								options: [
+									{
+										name: 'Comment',
+										value: 'comment',
+									},
+									{
+										name: 'Edit',
+										value: 'edit',
+									},
+									{
+										name: 'Full Access',
+										value: 'fullAccess',
+										description: 'View, comment, edit, and share',
+									},
+									{
+										name: 'View',
+										value: 'view',
+									},
+								],
+								default: 'view',
+								description: 'Permission level for email recipients',
+							},
+						],
+					},
+				],
+			},
+		],
+	},
+
+	// =====================================
+	// Create from Template Operation
+	// =====================================
+	{
+		displayName: 'Gamma ID',
+		name: 'gammaId',
+		type: 'string',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['gamma'],
+				operation: ['createFromTemplate'],
+			},
+		},
+		default: '',
+		description: 'The ID of the template gamma to use. Copy this from the Gamma app URL.',
+		placeholder: '123abc456def',
+	},
+	{
+		displayName: 'Prompt',
+		name: 'prompt',
+		type: 'string',
+		typeOptions: {
+			rows: 6,
+		},
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['gamma'],
+				operation: ['createFromTemplate'],
+			},
+		},
+		default: '',
+		description: 'Content, image URLs, and instructions for modifying the template. Supports up to 100,000 tokens (approximately 400,000 characters). Example: Change this pitch deck about deep sea exploration into one about space exploration.',
+		placeholder: 'Change this pitch deck about deep sea exploration into one about space exploration.',
+	},
+	{
+		displayName: 'Additional Options',
+		name: 'additionalOptions',
+		type: 'collection',
+		placeholder: 'Add Option',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['gamma'],
+				operation: ['createFromTemplate'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Export As',
+				name: 'exportAs',
+				type: 'options',
+				options: [
+					{
+						name: 'None',
+						value: '',
+					},
+					{
+						name: 'PDF',
+						value: 'pdf',
+					},
+					{
+						name: 'PPTX',
+						value: 'pptx',
+					},
+				],
+				default: '',
+				description: 'Additional file type for saving your gamma (choose one). Downloads are temporary and should be captured immediately.',
+			},
+			{
+				displayName: 'Folder IDs',
+				name: 'folderIds',
+				type: 'string',
+				default: '',
+				description: 'Comma-separated list of folder IDs where the generated gamma should be stored. Example: 123abc456,def456789. Get folder IDs using the List Folders operation.',
+				placeholder: '123abc456,def456789',
+			},
+			{
+				displayName: 'Theme ID',
+				name: 'themeId',
+				type: 'string',
+				default: '',
+				description: 'The ID of the Gamma theme to apply. Defaults to the template\'s existing theme. Get theme IDs using the List Themes operation or copy from the app.',
+				placeholder: 'theme_abc123',
+			},
+		],
+	},
+	{
+		displayName: 'Image Options',
+		name: 'imageOptions',
+		type: 'collection',
+		placeholder: 'Add Image Option',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['gamma'],
+				operation: ['createFromTemplate'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Model',
+				name: 'model',
+				type: 'options',
+				options: [
+					{ name: 'Dall E 3 (33 Credits)', value: 'dall-e-3' },
+					{ name: 'Flux Fast 1.1 (2 Credits)', value: 'flux-1-quick' },
+					{ name: 'Flux Kontext Fast (2 Credits)', value: 'flux-kontext-fast' },
+					{ name: 'Flux Kontext Max (40 Credits) [Ultra Plan]', value: 'flux-kontext-max' },
+					{ name: 'Flux Kontext Pro (20 Credits)', value: 'flux-kontext-pro' },
+					{ name: 'Flux Pro (8 Credits)', value: 'flux-1-pro' },
+					{ name: 'Flux Ultra (30 Credits) [Ultra Plan]', value: 'flux-1-ultra' },
+					{ name: 'GPT Image Detailed (120 Credits) [Ultra Plan]', value: 'gpt-image-1-high' },
+					{ name: 'GPT Image Medium (30 Credits)', value: 'gpt-image-1-medium' },
+					{ name: 'Ideogram 3 (20 Credits)', value: 'ideogram-v3' },
+					{ name: 'Ideogram 3 Turbo (10 Credits)', value: 'ideogram-v3-turbo' },
+					{ name: 'Ideogram 3.0 Quality (45 Credits) [Ultra Plan]', value: 'ideogram-v3-quality' },
+					{ name: 'Imagen 3 (8 Credits)', value: 'imagen-3-pro' },
+					{ name: 'Imagen 3 Fast (2 Credits)', value: 'imagen-3-flash' },
+					{ name: 'Imagen 4 (20 Credits)', value: 'imagen-4-pro' },
+					{ name: 'Imagen 4 Ultra (30 Credits) [Ultra Plan]', value: 'imagen-4-ultra' },
+					{ name: 'Leonardo Phoenix (15 Credits)', value: 'leonardo-phoenix' },
+					{ name: 'Luma Photon (10 Credits)', value: 'luma-photon-1' },
+					{ name: 'Luma Photon Flash (2 Credits)', value: 'luma-photon-flash-1' },
+					{ name: 'Recraft (20 Credits)', value: 'recraft-v3' },
+					{ name: 'Recraft Vector Illustration (40 Credits)', value: 'recraft-v3-svg' },
+				],
+				default: 'flux-1-quick',
+				description: 'AI image generation model to use for creating new images. Auto-selected if unspecified.',
+			},
+			{
+				displayName: 'Style',
+				name: 'style',
+				type: 'string',
+				default: '',
+				description: 'Artistic direction for generated images. Character limits: 1-500. Example: photorealistic or minimal, black and white, line art.',
+				placeholder: 'photorealistic',
+			},
+		],
+	},
+	{
+		displayName: 'Sharing Options',
+		name: 'sharingOptions',
+		type: 'collection',
+		placeholder: 'Add Sharing Option',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['gamma'],
+				operation: ['createFromTemplate'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Email Options',
+				name: 'emailOptions',
+				type: 'fixedCollection',
+				default: {},
+				description: 'Share gamma directly via email',
+				options: [
+					{
+						displayName: 'Email Recipients',
+						name: 'emailRecipients',
+						values: [
+							{
+								displayName: 'Recipients',
+								name: 'recipients',
+								type: 'string',
+								default: '',
+								description: 'Comma-separated list of email addresses to share the gamma with. Example: user1@example.com,user2@example.com.',
+								placeholder: 'user1@example.com,user2@example.com',
+							},
+							{
+								displayName: 'Access Level',
+								name: 'access',
+								type: 'options',
+								options: [
+									{
+										name: 'Comment',
+										value: 'comment',
+									},
+									{
+										name: 'Edit',
+										value: 'edit',
+									},
+									{
+										name: 'Full Access',
+										value: 'fullAccess',
+										description: 'View, comment, edit, and share',
+									},
+									{
+										name: 'View',
+										value: 'view',
+									},
+								],
+								default: 'view',
+								description: 'Permission level for email recipients',
+							},
+						],
+					},
+				],
+			},
+			{
+				displayName: 'External Access',
+				name: 'externalAccess',
+				type: 'options',
+				options: [
+					{
+						name: 'Comment',
+						value: 'comment',
+					},
+					{
+						name: 'Edit',
+						value: 'edit',
+					},
+					{
+						name: 'No Access',
+						value: 'noAccess',
+					},
+					{
+						name: 'View',
+						value: 'view',
+					},
+				],
+				default: 'noAccess',
+				description: 'Level of access to your gamma for members outside your workspace. Leave as No Access to use workspace share setting.',
+			},
+			{
+				displayName: 'Workspace Access',
+				name: 'workspaceAccess',
+				type: 'options',
+				options: [
+					{
+						name: 'Comment',
+						value: 'comment',
+					},
+					{
+						name: 'Edit',
+						value: 'edit',
+					},
+					{
+						name: 'Full Access',
+						value: 'fullAccess',
+						description: 'View, comment, edit, and share',
+					},
+					{
+						name: 'No Access',
+						value: 'noAccess',
+					},
+					{
+						name: 'View',
+						value: 'view',
+					},
+				],
+				default: 'noAccess',
+				description: 'Level of access to your gamma for members in your workspace. Leave as No Access to use workspace share setting.',
+			},
 		],
 	},
 
@@ -716,6 +1753,96 @@ export const gammaFields: INodeProperties[] = [
 			},
 		},
 		description: 'The generation ID returned from the Generate operation',
-		placeholder: 'yyyyyyyyyy',
-	}
+		placeholder: 'gen_abc123xyz',
+	},
+
+	// =====================================
+	// List Themes Operation
+	// =====================================
+	{
+		displayName: 'Options',
+		name: 'options',
+		type: 'collection',
+		placeholder: 'Add Option',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['gamma'],
+				operation: ['listThemes'],
+			},
+		},
+		options: [
+			{
+				displayName: 'After',
+				name: 'after',
+				type: 'string',
+				default: '',
+				description: 'Cursor token for pagination. Pass the nextCursor value from a previous response to get the next page of results.',
+				placeholder: 'cursor_abc123',
+			},
+			{
+				displayName: 'Limit',
+				name: 'limit',
+				type: 'number',
+				default: 50,
+				description: 'Max number of results to return',
+				typeOptions: {
+					minValue: 1,
+				},
+			},
+			{
+				displayName: 'Query',
+				name: 'query',
+				type: 'string',
+				default: '',
+				description: 'Search themes by name (case-insensitive). Filters results to items matching the search term.',
+				placeholder: 'dark',
+			},
+		],
+	},
+
+	// =====================================
+	// List Folders Operation
+	// =====================================
+	{
+		displayName: 'Options',
+		name: 'options',
+		type: 'collection',
+		placeholder: 'Add Option',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['gamma'],
+				operation: ['listFolders'],
+			},
+		},
+		options: [
+			{
+				displayName: 'After',
+				name: 'after',
+				type: 'string',
+				default: '',
+				description: 'Cursor token for pagination. Pass the nextCursor value from a previous response to get the next page of results.',
+				placeholder: 'cursor_abc123',
+			},
+			{
+				displayName: 'Limit',
+				name: 'limit',
+				type: 'number',
+				default: 50,
+				description: 'Max number of results to return',
+				typeOptions: {
+					minValue: 1,
+				},
+			},
+			{
+				displayName: 'Query',
+				name: 'query',
+				type: 'string',
+				default: '',
+				description: 'Search folders by name (case-insensitive). Filters results to items matching the search term.',
+				placeholder: 'marketing',
+			},
+		],
+	},
 ];

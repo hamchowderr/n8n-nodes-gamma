@@ -34,12 +34,9 @@ export class GammaApi implements ICredentialType {
 
 	test: ICredentialTestRequest = {
 		request: {
-			baseURL: 'https://public-api.gamma.app/v0.2',
-			url: '/generations',
-			method: 'POST',
-			body: {
-				inputText: 'test',
-			},
+			baseURL: 'https://public-api.gamma.app/v1.0',
+			url: '/themes',
+			method: 'GET',
 		},
 	};
 }

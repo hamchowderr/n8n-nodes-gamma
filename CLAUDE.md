@@ -90,16 +90,35 @@ n8n-nodes-gamma/
 
 ### API Integration
 
-**Base URL**: `https://public-api.gamma.app/v0.2`
+**Base URLs**:
+- v0.2: `https://public-api.gamma.app/v0.2` (Generate, Get Status)
+- v1.0: `https://public-api.gamma.app/v1.0` (Create from Template, List Themes, List Folders)
 
 **Operations**:
-1. **Generate** (`POST /generations`)
-   - Creates a new Gamma presentation, document, or social post
+1. **Generate** (`POST /v0.2/generations`)
+   - Creates a new Gamma presentation, document, or social post from scratch
    - Returns `generationId` and optional `warnings`
 
-2. **Get Status** (`GET /generations/{generationId}`)
+2. **Get Status** (`GET /v0.2/generations/{generationId}`)
    - Checks generation status and retrieves URLs
    - Returns status (`pending`/`completed`), URLs, and credit info
+   - Works for both Generate and Create from Template operations
+
+3. **Create from Template** (`POST /v1.0/generations/from-template`) - BETA
+   - Creates a new gamma based on an existing template
+   - Required: `gammaId`, `prompt` (up to 100,000 tokens)
+   - Optional: `themeId`, `folderIds` (array), `exportAs`, `imageOptions`, `sharingOptions`
+   - Returns `generationId`
+
+4. **List Themes** (`GET /v1.0/themes`)
+   - Lists available Gamma themes (standard and custom)
+   - Optional query params: `query`, `limit` (max 50), `after` (cursor)
+   - Returns paginated list with `data`, `hasMore`, `nextCursor`
+
+5. **List Folders** (`GET /v1.0/folders`)
+   - Lists available folders in workspace
+   - Optional query params: `query`, `limit` (max 50), `after` (cursor)
+   - Returns paginated list with `data`, `hasMore`, `nextCursor`
 
 ### Error Handling
 
@@ -114,9 +133,24 @@ n8n-nodes-gamma/
 - 500: Server error
 - 502: Bad gateway
 
+**Create from Template Operation**:
+- 400: Input validation errors
+- 401: Invalid API key
+- 403: Forbidden (no credits or access denied)
+- 404: Template not found
+- 422: Failed to generate from template
+- 429: Too many requests
+- 500: Server error
+- 502: Bad gateway
+
 **Get Status Operation**:
 - 401: Invalid API key
 - 404: Generation ID not found
+- 500: Server error
+- 502: Bad gateway
+
+**List Themes & List Folders Operations**:
+- 401: Invalid API key
 - 500: Server error
 - 502: Bad gateway
 

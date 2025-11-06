@@ -716,7 +716,6 @@ curl -X GET https://public-api.gamma.app/v1.0/generations/GENERATION_ID_HERE \
 
 - **Cache theme and folder lists** at workflow start (refresh daily/weekly)
 - **Use batch processing** for multiple clients (process 5-10 at once)
-- **Implement rate limiting** (50 generations/day per user limit)
 - **Monitor credit usage** to avoid unexpected depletion
 
 **Real-World Applications:**

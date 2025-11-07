@@ -96,7 +96,6 @@ export class Gamma implements INodeType {
 					};
 
 					// Add optional fields
-					if (additionalOptions.themeName) body.themeName = additionalOptions.themeName;
 					if (additionalOptions.themeId) body.themeId = additionalOptions.themeId;
 					if (additionalOptions.numCards) body.numCards = additionalOptions.numCards;
 					if (additionalOptions.cardSplit) body.cardSplit = additionalOptions.cardSplit;

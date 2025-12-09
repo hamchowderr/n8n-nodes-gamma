@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-gamma",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "n8n node for Gamma API - Generate AI-powered presentations, documents, and social posts",
   "keywords": [
     "n8n-community-node-package",
@@ -24,12 +24,12 @@
   },
   "main": "index.js",
   "scripts": {
-    "build": "npx rimraf dist && tsc && gulp build:icons",
-    "dev": "tsc --watch",
+    "build": "n8n-node build",
+    "dev": "n8n-node dev",
     "format": "prettier nodes credentials --write",
-    "lint": "eslint nodes credentials package.json",
-    "lintfix": "eslint nodes credentials package.json --fix",
-    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes credentials package.json"
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "release": "n8n-node release"
   },
   "files": [
     "dist"
@@ -44,10 +44,7 @@
     ]
   },
   "devDependencies": {
-    "@typescript-eslint/parser": "~8.32.0",
-    "eslint": "^8.57.0",
-    "eslint-plugin-n8n-nodes-base": "^1.16.3",
-    "gulp": "^5.0.0",
+    "@n8n/node-cli": "^0.17.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },

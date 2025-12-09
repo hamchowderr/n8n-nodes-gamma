@@ -6,8 +6,82 @@ import {
 	NodeApiError,
 	NodeOperationError,
 	JsonObject,
+	IDataObject,
 } from 'n8n-workflow';
 import { gammaOperations, gammaFields } from './GammaDescription';
+
+interface AdditionalOptions {
+	themeId?: string;
+	numCards?: number;
+	cardSplit?: string;
+	additionalInstructions?: string;
+	exportAs?: string;
+	folderIds?: string;
+}
+
+interface TextOptions {
+	amount?: string;
+	tone?: string;
+	audience?: string;
+	language?: string;
+}
+
+interface ImageOptions {
+	source?: string;
+	model?: string;
+	style?: string;
+}
+
+interface HeaderFooterElement {
+	type?: string;
+	value?: string;
+	source?: string;
+	src?: string;
+	size?: string;
+}
+
+interface HeaderFooterPosition {
+	element?: HeaderFooterElement;
+}
+
+interface HeaderFooterPositions {
+	topLeft?: HeaderFooterPosition;
+	topCenter?: HeaderFooterPosition;
+	topRight?: HeaderFooterPosition;
+	bottomLeft?: HeaderFooterPosition;
+	bottomCenter?: HeaderFooterPosition;
+	bottomRight?: HeaderFooterPosition;
+	hideFromFirstCard?: boolean;
+	hideFromLastCard?: boolean;
+}
+
+interface CardOptions {
+	dimensions?: string;
+	headerFooter?: {
+		positions?: HeaderFooterPositions;
+	};
+}
+
+interface EmailRecipients {
+	recipients?: string;
+	access?: string;
+}
+
+interface EmailOptionsWrapper {
+	emailRecipients?: EmailRecipients;
+}
+
+interface SharingOptions {
+	workspaceAccess?: string;
+	externalAccess?: string;
+	emailOptions?: EmailOptionsWrapper;
+}
+
+interface ListOptions {
+	query?: string;
+	limit?: number;
+	after?: string;
+}
 
 export class Gamma implements INodeType {
 	description: INodeTypeDescription = {
@@ -60,11 +134,11 @@ export class Gamma implements INodeType {
 					const inputText = this.getNodeParameter('inputText', i) as string;
 					const textMode = this.getNodeParameter('textMode', i) as string;
 					const format = this.getNodeParameter('format', i) as string;
-					const additionalOptions = this.getNodeParameter('additionalOptions', i, {}) as any;
-					const textOptions = this.getNodeParameter('textOptions', i, {}) as any;
-					const imageOptions = this.getNodeParameter('imageOptions', i, {}) as any;
-					const cardOptions = this.getNodeParameter('cardOptions', i, {}) as any;
-					const sharingOptions = this.getNodeParameter('sharingOptions', i, {}) as any;
+					const additionalOptions = this.getNodeParameter('additionalOptions', i, {}) as AdditionalOptions;
+					const textOptions = this.getNodeParameter('textOptions', i, {}) as TextOptions;
+					const imageOptions = this.getNodeParameter('imageOptions', i, {}) as ImageOptions;
+					const cardOptions = this.getNodeParameter('cardOptions', i, {}) as CardOptions;
+					const sharingOptions = this.getNodeParameter('sharingOptions', i, {}) as SharingOptions;
 
 					// Validate input text
 					if (!inputText || inputText.trim().length === 0) {
@@ -89,7 +163,7 @@ export class Gamma implements INodeType {
 						);
 					}
 
-					const body: any = {
+					const body: IDataObject = {
 						inputText,
 						textMode,
 						format,
@@ -111,81 +185,90 @@ export class Gamma implements INodeType {
 
 					// Add nested options
 					if (Object.keys(textOptions).length > 0) {
-						body.textOptions = {};
-						if (textOptions.amount) body.textOptions.amount = textOptions.amount;
-						if (textOptions.tone) body.textOptions.tone = textOptions.tone;
-						if (textOptions.audience) body.textOptions.audience = textOptions.audience;
-						if (textOptions.language) body.textOptions.language = textOptions.language;
+						const textOpts: IDataObject = {};
+						if (textOptions.amount) textOpts.amount = textOptions.amount;
+						if (textOptions.tone) textOpts.tone = textOptions.tone;
+						if (textOptions.audience) textOpts.audience = textOptions.audience;
+						if (textOptions.language) textOpts.language = textOptions.language;
+						body.textOptions = textOpts;
 					}
 
 					if (Object.keys(imageOptions).length > 0) {
-						body.imageOptions = {};
-						if (imageOptions.source) body.imageOptions.source = imageOptions.source;
-						if (imageOptions.model) body.imageOptions.model = imageOptions.model;
-						if (imageOptions.style) body.imageOptions.style = imageOptions.style;
+						const imgOpts: IDataObject = {};
+						if (imageOptions.source) imgOpts.source = imageOptions.source;
+						if (imageOptions.model) imgOpts.model = imageOptions.model;
+						if (imageOptions.style) imgOpts.style = imageOptions.style;
+						body.imageOptions = imgOpts;
 					}
 
 					if (Object.keys(cardOptions).length > 0) {
-						body.cardOptions = {};
-						if (cardOptions.dimensions) body.cardOptions.dimensions = cardOptions.dimensions;
+						const cardOpts: IDataObject = {};
+						if (cardOptions.dimensions) cardOpts.dimensions = cardOptions.dimensions;
 
 						// Handle headerFooter
 						if (cardOptions.headerFooter?.positions) {
 							const positions = cardOptions.headerFooter.positions;
-							body.cardOptions.headerFooter = {};
+							const headerFooterOpts: IDataObject = {};
 
 							// Process each position
-							const positionNames = ['topLeft', 'topCenter', 'topRight', 'bottomLeft', 'bottomCenter', 'bottomRight'];
+							const positionNames = ['topLeft', 'topCenter', 'topRight', 'bottomLeft', 'bottomCenter', 'bottomRight'] as const;
 							for (const posName of positionNames) {
-								if (positions[posName]?.element) {
-									const element = positions[posName].element;
+								const pos = positions[posName];
+								if (pos?.element) {
+									const element = pos.element;
 									if (element.type) {
-										body.cardOptions.headerFooter[posName] = { type: element.type };
+										const posData: IDataObject = { type: element.type };
 
 										// Add conditional fields based on type
 										if (element.type === 'text' && element.value) {
-											body.cardOptions.headerFooter[posName].value = element.value;
+											posData.value = element.value;
 										}
 										if (element.type === 'image') {
 											if (element.source) {
-												body.cardOptions.headerFooter[posName].source = element.source;
+												posData.source = element.source;
 											}
 											if (element.source === 'custom' && element.src) {
-												body.cardOptions.headerFooter[posName].src = element.src;
+												posData.src = element.src;
 											}
 										}
 										if (element.size) {
-											body.cardOptions.headerFooter[posName].size = element.size;
+											posData.size = element.size;
 										}
+										headerFooterOpts[posName] = posData;
 									}
 								}
 							}
 
 							// Add boolean flags
 							if (positions.hideFromFirstCard !== undefined) {
-								body.cardOptions.headerFooter.hideFromFirstCard = positions.hideFromFirstCard;
+								headerFooterOpts.hideFromFirstCard = positions.hideFromFirstCard;
 							}
 							if (positions.hideFromLastCard !== undefined) {
-								body.cardOptions.headerFooter.hideFromLastCard = positions.hideFromLastCard;
+								headerFooterOpts.hideFromLastCard = positions.hideFromLastCard;
 							}
+							cardOpts.headerFooter = headerFooterOpts;
 						}
+						body.cardOptions = cardOpts;
 					}
 
 					if (Object.keys(sharingOptions).length > 0) {
-						body.sharingOptions = {};
+						const shareOpts: IDataObject = {};
 						if (sharingOptions.workspaceAccess && sharingOptions.workspaceAccess !== '') {
-							body.sharingOptions.workspaceAccess = sharingOptions.workspaceAccess;
+							shareOpts.workspaceAccess = sharingOptions.workspaceAccess;
 						}
 						if (sharingOptions.externalAccess && sharingOptions.externalAccess !== '') {
-							body.sharingOptions.externalAccess = sharingOptions.externalAccess;
+							shareOpts.externalAccess = sharingOptions.externalAccess;
 						}
 						if (sharingOptions.emailOptions?.emailRecipients) {
 							const emailRecipients = sharingOptions.emailOptions.emailRecipients;
-							body.sharingOptions.emailOptions = {
-								recipients: emailRecipients.recipients.split(',').map((email: string) => email.trim()),
-								access: emailRecipients.access || 'view',
-							};
+							if (emailRecipients.recipients) {
+								shareOpts.emailOptions = {
+									recipients: emailRecipients.recipients.split(',').map((email: string) => email.trim()),
+									access: emailRecipients.access || 'view',
+								};
+							}
 						}
+						body.sharingOptions = shareOpts;
 					}
 
 					try {
@@ -201,11 +284,12 @@ export class Gamma implements INodeType {
 						);
 
 						returnData.push({
-							json: response as any,
+							json: response as IDataObject,
 							pairedItem: i,
 						});
 					} catch (error) {
-						if (error.httpCode === '400') {
+						const apiError = error as NodeApiError;
+						if (apiError.httpCode === '400') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Input validation errors',
 								description: 'Invalid parameters detected. Check the error details for specific parameter requirements.',
@@ -213,7 +297,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '401') {
+						if (apiError.httpCode === '401') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Invalid API key',
 								description: 'The provided API key is invalid or not associated with a Pro account.',
@@ -221,7 +305,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '403') {
+						if (apiError.httpCode === '403') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Forbidden',
 								description: 'No credits left. Upgrade your plan or refill credits.',
@@ -229,7 +313,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '422') {
+						if (apiError.httpCode === '422') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Failed to generate text. Check your inputs and try again.',
 								description: 'Generation produced an empty output. Review your input parameters and ensure your instructions are clear.',
@@ -237,7 +321,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '429') {
+						if (apiError.httpCode === '429') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Too many requests',
 								description: 'Too many requests have been made. Retry after the rate limit period.',
@@ -245,7 +329,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '500') {
+						if (apiError.httpCode === '500') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'An error occurred while generating the gamma.',
 								description: 'An unexpected error occurred while generating the gamma. Contact support with the x-request-id header for troubleshooting assistance.',
@@ -253,7 +337,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '502') {
+						if (apiError.httpCode === '502') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Bad gateway',
 								description: 'The request could not be processed due to a temporary gateway issue. Try again.',
@@ -290,11 +374,12 @@ export class Gamma implements INodeType {
 						);
 
 						returnData.push({
-							json: response as any,
+							json: response as IDataObject,
 							pairedItem: i,
 						});
 					} catch (error) {
-						if (error.httpCode === '401') {
+						const apiError = error as NodeApiError;
+						if (apiError.httpCode === '401') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Invalid API key',
 								description: 'The provided API key is invalid or not associated with a Pro account.',
@@ -302,7 +387,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '404') {
+						if (apiError.httpCode === '404') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: `Generation ID not found. generationId: ${generationId}`,
 								description: 'The specified generation ID could not be located. Check and correct your generation ID.',
@@ -310,7 +395,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '500') {
+						if (apiError.httpCode === '500') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'An error occurred while generating the gamma.',
 								description: 'An unexpected error occurred while generating the gamma. Contact support with the x-request-id header for troubleshooting assistance.',
@@ -318,7 +403,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '502') {
+						if (apiError.httpCode === '502') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Bad gateway',
 								description: 'The request could not be processed due to a temporary gateway issue. Try again.',
@@ -331,9 +416,9 @@ export class Gamma implements INodeType {
 				} else if (operation === 'createFromTemplate') {
 					const gammaId = this.getNodeParameter('gammaId', i) as string;
 					const prompt = this.getNodeParameter('prompt', i) as string;
-					const additionalOptions = this.getNodeParameter('additionalOptions', i, {}) as any;
-					const imageOptions = this.getNodeParameter('imageOptions', i, {}) as any;
-					const sharingOptions = this.getNodeParameter('sharingOptions', i, {}) as any;
+					const additionalOptions = this.getNodeParameter('additionalOptions', i, {}) as AdditionalOptions;
+					const imageOptions = this.getNodeParameter('imageOptions', i, {}) as ImageOptions;
+					const sharingOptions = this.getNodeParameter('sharingOptions', i, {}) as SharingOptions;
 
 					// Validate required fields
 					if (!gammaId || gammaId.trim().length === 0) {
@@ -358,7 +443,7 @@ export class Gamma implements INodeType {
 						);
 					}
 
-					const body: any = {
+					const body: IDataObject = {
 						gammaId,
 						prompt,
 					};
@@ -376,31 +461,33 @@ export class Gamma implements INodeType {
 
 					// Add image options
 					if (Object.keys(imageOptions).length > 0) {
-						body.imageOptions = {};
-						if (imageOptions.model) body.imageOptions.model = imageOptions.model;
-						if (imageOptions.style) body.imageOptions.style = imageOptions.style;
+						const imgOpts: IDataObject = {};
+						if (imageOptions.model) imgOpts.model = imageOptions.model;
+						if (imageOptions.style) imgOpts.style = imageOptions.style;
+						body.imageOptions = imgOpts;
 					}
 
 					// Add sharing options
 					if (Object.keys(sharingOptions).length > 0) {
-						body.sharingOptions = {};
+						const shareOpts: IDataObject = {};
 						if (sharingOptions.workspaceAccess && sharingOptions.workspaceAccess !== '') {
-							body.sharingOptions.workspaceAccess = sharingOptions.workspaceAccess;
+							shareOpts.workspaceAccess = sharingOptions.workspaceAccess;
 						}
 						if (sharingOptions.externalAccess && sharingOptions.externalAccess !== '') {
-							body.sharingOptions.externalAccess = sharingOptions.externalAccess;
+							shareOpts.externalAccess = sharingOptions.externalAccess;
 						}
 
 						// Handle email options
 						if (sharingOptions.emailOptions && sharingOptions.emailOptions.emailRecipients) {
 							const emailRecipients = sharingOptions.emailOptions.emailRecipients;
 							if (emailRecipients.recipients && emailRecipients.recipients.trim() !== '') {
-								body.sharingOptions.emailOptions = {
+								shareOpts.emailOptions = {
 									recipients: emailRecipients.recipients.split(',').map((email: string) => email.trim()),
 									access: emailRecipients.access || 'view',
 								};
 							}
 						}
+						body.sharingOptions = shareOpts;
 					}
 
 					try {
@@ -416,11 +503,12 @@ export class Gamma implements INodeType {
 						);
 
 						returnData.push({
-							json: response as any,
+							json: response as IDataObject,
 							pairedItem: i,
 						});
 					} catch (error) {
-						if (error.httpCode === '400') {
+						const apiError = error as NodeApiError;
+						if (apiError.httpCode === '400') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Input validation errors',
 								description: 'Invalid parameters detected. Check the error details for specific parameter requirements.',
@@ -428,7 +516,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '401') {
+						if (apiError.httpCode === '401') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Invalid API key',
 								description: 'The provided API key is invalid or not associated with a Pro account.',
@@ -436,7 +524,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '403') {
+						if (apiError.httpCode === '403') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Forbidden',
 								description: 'No credits left or access denied. Upgrade your plan or refill credits.',
@@ -444,7 +532,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '404') {
+						if (apiError.httpCode === '404') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Template not found',
 								description: 'The specified Gamma template ID could not be located. Check your Gamma ID.',
@@ -452,7 +540,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '422') {
+						if (apiError.httpCode === '422') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Failed to generate from template',
 								description: 'Generation produced an empty output. Review your prompt and ensure your instructions are clear.',
@@ -460,7 +548,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '429') {
+						if (apiError.httpCode === '429') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Too many requests',
 								description: 'Too many requests have been made. Retry after the rate limit period.',
@@ -468,7 +556,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '500') {
+						if (apiError.httpCode === '500') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'An error occurred while generating from template.',
 								description: 'An unexpected error occurred. Contact support with the x-request-id header for troubleshooting assistance.',
@@ -476,7 +564,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '502') {
+						if (apiError.httpCode === '502') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Bad gateway',
 								description: 'The request could not be processed due to a temporary gateway issue. Try again.',
@@ -487,7 +575,7 @@ export class Gamma implements INodeType {
 						throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex: i });
 					}
 				} else if (operation === 'listThemes') {
-					const options = this.getNodeParameter('options', i, {}) as any;
+					const options = this.getNodeParameter('options', i, {}) as ListOptions;
 
 					const queryParams: string[] = [];
 					if (options.query) queryParams.push(`query=${encodeURIComponent(options.query)}`);
@@ -508,11 +596,12 @@ export class Gamma implements INodeType {
 						);
 
 						returnData.push({
-							json: response as any,
+							json: response as IDataObject,
 							pairedItem: i,
 						});
 					} catch (error) {
-						if (error.httpCode === '401') {
+						const apiError = error as NodeApiError;
+						if (apiError.httpCode === '401') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Invalid API key',
 								description: 'The provided API key is invalid or not associated with a Pro account.',
@@ -520,7 +609,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '500') {
+						if (apiError.httpCode === '500') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'An error occurred while retrieving themes.',
 								description: 'An unexpected error occurred. Contact support with the x-request-id header for troubleshooting assistance.',
@@ -528,7 +617,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '502') {
+						if (apiError.httpCode === '502') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Bad gateway',
 								description: 'The request could not be processed due to a temporary gateway issue. Try again.',
@@ -539,7 +628,7 @@ export class Gamma implements INodeType {
 						throw new NodeApiError(this.getNode(), error as JsonObject, { itemIndex: i });
 					}
 				} else if (operation === 'listFolders') {
-					const options = this.getNodeParameter('options', i, {}) as any;
+					const options = this.getNodeParameter('options', i, {}) as ListOptions;
 
 					const queryParams: string[] = [];
 					if (options.query) queryParams.push(`query=${encodeURIComponent(options.query)}`);
@@ -560,11 +649,12 @@ export class Gamma implements INodeType {
 						);
 
 						returnData.push({
-							json: response as any,
+							json: response as IDataObject,
 							pairedItem: i,
 						});
 					} catch (error) {
-						if (error.httpCode === '401') {
+						const apiError = error as NodeApiError;
+						if (apiError.httpCode === '401') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Invalid API key',
 								description: 'The provided API key is invalid or not associated with a Pro account.',
@@ -572,7 +662,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '500') {
+						if (apiError.httpCode === '500') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'An error occurred while retrieving folders.',
 								description: 'An unexpected error occurred. Contact support with the x-request-id header for troubleshooting assistance.',
@@ -580,7 +670,7 @@ export class Gamma implements INodeType {
 							});
 						}
 
-						if (error.httpCode === '502') {
+						if (apiError.httpCode === '502') {
 							throw new NodeApiError(this.getNode(), error as JsonObject, {
 								message: 'Bad gateway',
 								description: 'The request could not be processed due to a temporary gateway issue. Try again.',

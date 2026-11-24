@@ -44,7 +44,7 @@
     ]
   },
   "devDependencies": {
-    "@n8n/node-cli": "^0.17.0",
+    "@n8n/node-cli": "^0.17.4",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
